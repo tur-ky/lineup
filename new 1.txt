@@ -1,0 +1,157 @@
+
+4) How users discover lineups on the map
+
+When a user is browsing, how do pins behave?
+
+Show all pins by default, or only pins matching filters?
+
+On hover: tooltip preview (name/type), or nothing?
+
+On click: open side panel details, or modal, or new page?
+
+5) Filter system (you gotta choose the mental model)
+
+What’s the filter stack?
+
+Required filters: Map, Side (T/CT), Utility type (smoke/flash/molly/HE), Site (A/B/Mid)?
+
+Do you want multi-select (multiple utility types at once) or single-select?
+
+Do filters live in: sidebar, top bar, or a floating filter button?
+
+6) Searching
+
+What should search query against?
+
+lineup name, tags, notes, author, map region labels, grenade type?
+And do you want search to:
+
+filter the list only, or also highlight matching pins on the map?
+
+7) “Add lineup” entry point
+
+How does creation start?
+
+A) Big “+ Add lineup” button
+
+B) Right-click on map (“Add lineup here”)
+
+C) Hotkey (e.g., N)
+
+D) From a toolbar on the map
+
+8) Add lineup flow (this is the core UX)
+
+When adding a lineup, do you want:
+
+Step 1: place pin(s) on map → then fill form
+or
+
+Step 1: choose type + side + title → then place pin(s)
+
+And do you store one pin or two pins?
+
+A) only the landing location (where smoke lands)
+
+B) only the throw position (where player stands)
+
+C) both throw position + landing position (recommended)
+If both: do you want two different colored icons or different shapes?
+
+9) Lineup detail page/panel contents
+
+What’s mandatory in the details view?
+
+Title, utility type, side, short description, tags
+
+Step-by-step instructions (text)
+
+Crosshair lineup screenshot? (optional)
+
+Video/gif link or upload?
+
+“Copy share link” button?
+
+“Open on map and highlight” button?
+
+10) Editing / versions (collab apps live or die here)
+
+When a lineup is edited:
+
+A) overwrite silently
+
+B) create a new version (history)
+
+C) propose edit that needs approval
+Also: who can edit?
+
+only author, or trusted contributors, or anyone?
+
+11) Moderation + trust (minimum viable rules)
+
+Pick your MVP moderation model:
+
+A) Public read, auth required to submit, submissions go live immediately
+
+B) Public read, auth required to submit, approval queue
+
+C) Private groups/teams only
+Also: do you want “Report lineup” button in MVP?
+
+12) “Auto-update” behavior (be specific)
+
+When someone adds a lineup, how should other clients update?
+
+A) Live realtime (pins appear immediately)
+
+B) Soft realtime (toast: “New lineup available → refresh list”)
+
+C) Polling every X minutes
+And if you’re currently viewing that map, should it:
+
+auto-add the pin to the map instantly, or wait until you clear a toast?
+
+13) Map interaction mechanics
+
+Zoom/pan: mouse wheel + drag? touchpad? buttons?
+
+Pin snapping: free placement or snap-to-grid?
+
+Do you want region labels on the SVG (clickable areas) or keep SVG purely visual?
+
+14) “Save time” features (choose 0–2 for MVP)
+
+Which of these are MVP-worthy?
+
+Favorites / bookmarks
+
+“My submissions” tab
+
+Upvote / rating
+
+Comment thread on lineup
+
+Collections/playlists (“my Mirage exec set”)
+
+Answer format (fast)
+
+Reply like:
+
+A
+
+B
+
+A + cards
+
+Show filtered pins only; hover tooltip; click side panel
+… etc.
+
+Once you answer these, I’ll produce a custom boot prompt that:
+
+forces Kirkceptually to lock these decisions first
+
+makes it generate the exact “Development Prompt for ChadGPT_Dev”
+
+generates the “Context Pack Checklist” specifically including your SVG coordinate rules + icons naming + Supabase realtime plan
+
+Hit me with your choices.

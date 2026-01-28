@@ -1,0 +1,150 @@
+
+## 2) Blocking Questions (max 10) — with recommended defaults
+
+### 1) Auth + contribution model (BLOCKING: security/usability)
+
+**You flagged** “paste Supabase user id as a password-like token.” This is **not safe** (a user ID isn’t a secret; it’s guessable/observable, and it doesn’t prove identity).
+**Choose one:**
+
+* **A. Magic link (recommended default):** email-only, no password. Lowest friction that’s still real auth.
+* **B. Anonymous browse + “submit lineup” form → approval queue:** contributors don’t need accounts; admins approve/publish. (Great if you want ultra-low friction and are okay with moderation.)
+* **C. Invite code → creates lightweight account or “contributor session”:** share a code with friends/Discord; rotate codes.
+* **D. OAuth (Steam/Discord/Google):** slightly heavier but familiar.
+
+**Default if you don’t choose:** **A (Magic link)** + public read, authenticated create.
+
+### 2) Visibility + access: public vs private maps/lineups (BLOCKING)
+
+* Are lineups **publicly readable** to anyone with the link / anyone who opens the app, or private to a group?
+* Should share links work for **logged-out viewers**?
+
+**Default:** Public read for all published lineups; share links work without login.
+
+### 3) Publishing & moderation (BLOCKING)
+
+When a contributor creates a lineup, does it:
+
+* publish immediately, or
+* go into “pending” until approved?
+
+**Default:** **Immediate publish for trusted/auth users** + **rate limiting**; optional “pending queue” only for anonymous submissions if you pick model B.
+
+### 4) Editing & ownership rules (BLOCKING)
+
+Who can edit/delete an existing lineup?
+
+* Creator only?
+* Any authenticated contributor?
+* Admins only?
+  And do edits overwrite or create versions?
+
+**Default:** Creator can edit/delete their own; admins can edit/delete any; edits overwrite (no full version history in MVP, but store `updated_at` + `updated_by`).
+
+### 5) Duplicate handling: landing pin merges and lineup grouping (BLOCKING)
+
+You allow multiple lineups per landing pin. Define “same landing pin”:
+
+* exact same coordinates,
+* within a radius threshold (e.g., ≤ 8px or ≤ 1% map width),
+* or manual merge by admin.
+
+**Default:** Auto-group by **radius threshold** + same map; allow admin “merge pins” tool later (not MVP).
+
+### 6) Favorites/bookmarks scope (BLOCKING)
+
+Are favorites:
+
+* per-user account (requires auth), or
+* local-only (browser localStorage), or
+* both?
+
+**Default:** **Local-only for logged-out**, and if user logs in, **sync to account** (migrate local → server once).
+
+### 7) Media storage constraints (BLOCKING)
+
+You require 3 screenshots, optional video/GIF.
+
+* Max sizes? Allowed formats?
+* Any client-side compression/resizing?
+* Is video/GIF allowed in MVP or gated behind a size cap?
+
+**Default:** Images: PNG/JPG/WebP up to **5MB each** (auto-compress to WebP client-side). Video/GIF: optional, **≤ 15MB** (or disable video in MVP if you want simplest).
+
+### 8) Map set & data source (BLOCKING)
+
+How many maps ship in MVP, and how are maps represented?
+
+* One initial map only?
+* Multiple maps with different SVGs?
+* Do maps need named regions (A/B/Mid) encoded?
+
+**Default:** Start with **1–3 maps**. Each map has: SVG, coordinate system, and optional region polygons/labels for A/B/Mid filtering.
+
+### 9) Region filter definition (BLOCKING if included in MVP)
+
+If you include A/B/Mid filter: is region assigned by:
+
+* creator selecting A/B/Mid in the form, or
+* computed from coordinates via polygons, or
+* both (computed suggestion, editable)?
+
+**Default:** Creator selects A/B/Mid in form (fastest). If you already have region polygons, compute a default and let user override.
+
+### 10) Soft realtime implementation boundary (BLOCKING)
+
+What triggers “New lineup available”?
+
+* Any new lineup on current map that matches current filters?
+* Any new lineup on the selected map (even if filtered out)?
+* Only from followed/favorited pins?
+
+**Default:** Toast when **new published lineup exists for selected map**, regardless of current filters; toast text clarifies “New lineups on this map.”
+
+---
+
+## 3) Non-blocking Questions (optional) — with defaults
+
+* **Pin tooltip label source:** title vs short label field?
+  **Default:** Use `title` truncated; add optional `short_label` later.
+
+* **Coordinate precision:** store as normalized (0–1) vs SVG pixels?
+  **Default:** Store **normalized** (x,y in 0..1 relative to SVG viewBox) so it survives responsive scaling.
+
+* **Share link shape:** `/map/:mapSlug?pin=:pinId&lineup=:lineupId` vs short ids.
+  **Default:** readable URL with IDs; add short links later.
+
+* **Accessibility baseline:** keyboard close modal (Esc), focus trap, aria labels.
+  **Default:** Yes.
+
+---
+
+## 4) Next Step — what I need from you (assets/spec files) before the final dev prompt
+
+Upload/provide (even rough is fine):
+
+1. **Map SVG(s)** for MVP
+
+* 1–3 SVG files, plus their **map names/slugs**.
+* Confirm the SVGs are already in the coordinate space you want (no dynamic layers needed).
+
+2. **Region definitions** (only if you want A/B/Mid to be computed)
+
+* Either: polygons/paths per region per map, or tell me “creator will select region manually” (then no polygons needed).
+
+3. **Lineup media examples** (2–3 sample sets)
+
+* Example screenshots (position/aim/result) and (optional) one video/GIF so we can set sane format/size rules.
+
+4. **Brand/UI baseline**
+
+* Logo (optional), preferred color(s), and whether dark mode is required in MVP.
+* If nothing: I’ll assume a clean neutral theme + dark-mode-friendly palette.
+
+5. **Your choice on the 10 blocking questions above** (bullet answers are enough)
+
+* Especially #1 (auth model), #3–#5 (moderation/edit/dupes), and #8–#9 (maps/regions).
+
+Once you answer those + provide the map SVG(s), I can produce the final:
+
+* **Development Prompt for ChadGPT_Dev** (in your required structure) 
+* **Context Pack Checklist** (exact files/assets + naming conventions)
