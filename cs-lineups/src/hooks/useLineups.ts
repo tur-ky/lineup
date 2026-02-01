@@ -34,7 +34,7 @@ export const useLineups = (activeMap: string, filters: Filters) => {
                     schema: 'public',
                     table: 'lineups',
                 },
-                (payload) => {
+                (payload: any) => {
                     const activeMapLower = activeMap.toLowerCase();
 
                     if (payload.eventType === 'INSERT') {

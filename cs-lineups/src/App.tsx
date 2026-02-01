@@ -14,7 +14,7 @@ import { useClusters } from "./hooks/useClusters";
 import { Lineup } from "./types/app";
 import { LineupDetailModal } from "./components/Viewing/LineupDetailModal";
 import { supabase } from "./lib/supabase";
-import { Session } from "@supabase/supabase-js";
+import { Session, AuthChangeEvent, AuthError } from "@supabase/supabase-js";
 import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { LoginScreen } from "./components/Overlays/LoginScreen";
 
@@ -46,13 +46,13 @@ function App() {
 
   // Initialize Session
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       setSession(session);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       setSession(session);
     });
 
@@ -84,7 +84,7 @@ function App() {
 
         if (access_token && refresh_token) {
           console.log("Tokens found, setting session...");
-          supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
+          supabase.auth.setSession({ access_token, refresh_token }).then(({ error }: { error: AuthError | null }) => {
             if (error) console.error("Error setting session:", error);
             else {
               console.log("Session set successfully");
