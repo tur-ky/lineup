@@ -30,7 +30,7 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
 
   // Data Fetching
-  const { lineups, loading } = useLineups(activeMap, filters);
+  const { lineups, loading, refreshLineups } = useLineups(activeMap, filters);
   // Radius of 30px ensures generous grouping for nearby pins.
   const clusters = useClusters(lineups, 30);
   const [selectedLineup, setSelectedLineup] = useState<Lineup | null>(null);
@@ -309,6 +309,9 @@ function App() {
               setTempLanding(undefined);
               setTempOrigin(undefined);
             }}
+            onSuccess={() => {
+              refreshLineups();
+            }}
           />
         )}
 
@@ -316,6 +319,9 @@ function App() {
           <LineupDetailModal
             lineup={selectedLineup}
             onClose={() => setSelectedLineup(null)}
+            onDelete={() => {
+              refreshLineups();
+            }}
           />
         )}
       </div>

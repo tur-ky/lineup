@@ -6,9 +6,10 @@ import { X, Copy, Check, ZoomIn, ZoomOut, Trash2 } from 'lucide-react';
 interface LineupDetailModalProps {
     lineup: Lineup;
     onClose: () => void;
+    onDelete?: () => void;
 }
 
-export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, onClose }) => {
+export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, onClose, onDelete }) => {
     const [imageUrls, setImageUrls] = useState<{ pos: string; aim: string; result: string } | null>(null);
     const [copied, setCopied] = useState(false);
 
@@ -72,6 +73,7 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
             if (error) throw error;
 
             onClose();
+            onDelete?.();
         } catch (err) {
             console.error('Failed to delete lineup:', err);
             alert('Failed to delete. Please try again.');

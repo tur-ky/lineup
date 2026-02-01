@@ -10,9 +10,10 @@ interface CreateLineupModalProps {
     activeMap: string;
     initialLanding?: { x: number; y: number };
     initialOrigin?: { x: number; y: number };
+    onSuccess?: () => void;
 }
 
-export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, activeMap, initialLanding, initialOrigin }) => {
+export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, activeMap, initialLanding, initialOrigin, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [state, setState] = useState<NewLineupState>({
         landing: initialLanding || null,
@@ -62,6 +63,7 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
 
             if (error) throw error;
             onClose();
+            onSuccess?.();
             // TODO: Refresh map
         } catch (e) {
             console.error("Error creating lineup:", e);
