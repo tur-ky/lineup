@@ -2,6 +2,18 @@ import React from 'react';
 
 import { Plus, Check, X } from 'lucide-react';
 
+import smokeIcon from '../../assets/utils/smoke.svg';
+import flashIcon from '../../assets/utils/flash.svg';
+import molotovIcon from '../../assets/utils/molotov.svg';
+import heIcon from '../../assets/utils/hegrenade.svg';
+
+const ICONS: Record<string, string> = {
+    smoke: smokeIcon,
+    flash: flashIcon,
+    molotov: molotovIcon,
+    hegrenade: heIcon
+};
+
 interface FilterPanelProps {
     filters: {
         side: { t: boolean; ct: boolean };
@@ -101,6 +113,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, toggleUtility
 };
 
 
+
 const FilterButton: React.FC<{ active: boolean; onClick: () => void; label: string; icon: string }> = ({ active, onClick, label, icon }) => (
     <button
         onClick={onClick}
@@ -109,7 +122,7 @@ const FilterButton: React.FC<{ active: boolean; onClick: () => void; label: stri
         className="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 relative group bg-transparent border-none outline-none shadow-none"
     >
         <img
-            src={`/utils/${icon}.svg`}
+            src={ICONS[icon]}
             style={{ filter: 'brightness(0) invert(1)' }}
             className={`w-8 h-8 relative z-10 transition-all duration-300
                 ${active

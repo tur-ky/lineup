@@ -1,6 +1,18 @@
 import React from 'react';
 import { Crosshair } from 'lucide-react';
 
+import smokeIcon from '../../assets/utils/smoke.svg';
+import flashIcon from '../../assets/utils/flash.svg';
+import molotovIcon from '../../assets/utils/molotov.svg';
+import heIcon from '../../assets/utils/hegrenade.svg';
+
+const ICONS: Record<string, string> = {
+    smoke: smokeIcon,
+    flash: flashIcon,
+    molotov: molotovIcon,
+    hegrenade: heIcon
+};
+
 interface PinProps {
     x: number;
     y: number;
@@ -55,7 +67,7 @@ export const Pin: React.FC<PinProps> = ({
                 <Crosshair size={10} className="text-white/80" />
             ) : (
                 <img
-                    src={`/utils/${iconName}.svg`}
+                    src={ICONS[iconName]}
                     className="object-contain select-none pointer-events-none"
                     alt={type}
                     style={{
