@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { Lineup, Filters } from '../types/app';
 
@@ -69,11 +69,13 @@ export const useLineups = (activeMap: string, filters: Filters) => {
     }, [refreshLineups, activeMap]);
 
     // Client-side Filtering (for smooth toggle performance)
-    const filteredLineups = lineups.filter(lineup => {
-        if (!filters.side[lineup.side]) return false;
-        if (!filters.utility[lineup.utility_type]) return false;
-        return true;
-    });
+    const filteredLineups = useMemo(() => {
+        return lineups.filter(lineup => {
+            if (!filters.side[lineup.side]) return false;
+            if (!filters.utility[lineup.utility_type]) return false;
+            return true;
+        });
+    }, [lineups, filters]);
 
     return { lineups: filteredLineups, loading, refreshLineups };
 };

@@ -16,6 +16,7 @@ export interface NewLineupState {
     side: 't' | 'ct';
     type: 'smoke' | 'flash' | 'molotov' | 'he';
     description: string;
+    throw_type: string;
     images: {
         pos: File | null;
         aim: File | null;

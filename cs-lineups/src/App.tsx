@@ -39,6 +39,7 @@ function App() {
 
   // Creation Flow State
   const [isCreating, setIsCreating] = useState(false);
+  const [editingLineup, setEditingLineup] = useState<Lineup | null>(null);
   const [selectionStep, setSelectionStep] = useState<'landing' | 'throwing' | null>(null);
   const [tempLanding, setTempLanding] = useState<{ x: number, y: number } | undefined>(undefined);
   const [tempOrigin, setTempOrigin] = useState<{ x: number, y: number } | undefined>(undefined);
@@ -66,19 +67,61 @@ function App() {
         .map(v => lineups.find(l => l.id === v.id))
         .filter((l): l is Lineup => !!l)
     );
-  }, [lineups]);
+    // Sync selected lineage if it's open (Update modal with fresh data)
+    if (selectedLineup) {
+      const updated = lineups.find(l => l.id === selectedLineup.id);
+      if (updated && JSON.stringify(updated) !== JSON.stringify(selectedLineup)) {
+        setSelectedLineup(updated);
+      }
+    }
+  }, [lineups, selectedLineup]);
 
-  // Deep link handling - Listen for auth callbacks
+  // Global ESC Handler
   useEffect(() => {
-    const handleDeepLink = (url: string) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // Priority order for closing overlays
+        if (showLogin) {
+          setShowLogin(false);
+          return;
+        }
+        if (selectedLineup) {
+          setSelectedLineup(null);
+          return;
+        }
+        if (isCreating || editingLineup) {
+          setIsCreating(false);
+          setEditingLineup(null);
+          setTempLanding(undefined);
+          setTempOrigin(undefined);
+          return;
+        }
+        if (selectionStep !== null) {
+          cancelSelection();
+          return;
+        }
+        if (visibleVectors.length > 0) {
+          setVisibleVectors([]);
+          return;
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showLogin, selectedLineup, isCreating, editingLineup, selectionStep, visibleVectors]);
+
+  // Deep link handling - Listen for auth callbacks AND lineup shares
+  useEffect(() => {
+    const handleDeepLink = async (url: string) => {
       console.log("Processing deep link:", url);
-      // alert("Deep link received!\n" + url); // Debug
 
       // Handle both hash (#) and query (?) based fragments
       const relevantPart = url.includes('#') ? url.split('#')[1] : url.split('?')[1];
 
       if (relevantPart) {
         const params = new URLSearchParams(relevantPart);
+
+        // Check for OAuth tokens (auth callback)
         const access_token = params.get('access_token');
         const refresh_token = params.get('refresh_token');
 
@@ -91,8 +134,40 @@ function App() {
               setShowLogin(false);
             }
           });
-        } else {
-          console.warn("No tokens found in URL fragment:", relevantPart);
+          return; // Don't process as lineup link
+        }
+
+        // Check for lineup ID (shared lineup)
+        const lineupId = params.get('id');
+        if (lineupId) {
+          console.log("Lineup ID found, fetching lineup:", lineupId);
+
+          // Fetch the lineup from database
+          const { data: lineup, error } = await supabase
+            .from('lineups')
+            .select('*')
+            .eq('id', lineupId)
+            .single();
+
+          if (error) {
+            console.error("Error fetching lineup:", error);
+            alert(`Could not load lineup: ${error.message}`);
+            return;
+          }
+
+          if (lineup) {
+            console.log("Deep link: Loading lineup", lineup.title, "on map", lineup.map_name);
+
+            // Switch to the correct map
+            const mapName = lineup.map_name.charAt(0).toUpperCase() + lineup.map_name.slice(1);
+            setActiveMap(mapName);
+
+            // Open the detail modal
+            // Don't touch visibleVectors - the sync effect will handle it
+            setSelectedLineup(lineup);
+          } else {
+            alert("Lineup not found. It may have been deleted.");
+          }
         }
       }
     };
@@ -299,13 +374,15 @@ function App() {
         {/* Overlays (Modals) */}
         {showLogin && <LoginScreen onClose={() => setShowLogin(false)} />}
 
-        {isCreating && (
+        {isCreating || editingLineup ? (
           <CreateLineupModal
             activeMap={activeMap}
             initialLanding={tempLanding}
             initialOrigin={tempOrigin}
+            initialData={editingLineup || undefined}
             onClose={() => {
               setIsCreating(false);
+              setEditingLineup(null);
               setTempLanding(undefined);
               setTempOrigin(undefined);
             }}
@@ -313,7 +390,7 @@ function App() {
               refreshLineups();
             }}
           />
-        )}
+        ) : null}
 
         {selectedLineup && (
           <LineupDetailModal
@@ -321,6 +398,10 @@ function App() {
             onClose={() => setSelectedLineup(null)}
             onDelete={() => {
               refreshLineups();
+            }}
+            onEdit={(lineup) => {
+              setSelectedLineup(null);
+              setEditingLineup(lineup);
             }}
           />
         )}

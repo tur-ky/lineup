@@ -25,6 +25,7 @@ export interface Database {
                     image_aim_path: string | null
                     image_result_path: string | null
                     description: string | null
+                    throw_type: string | null
                     user_id: string
                 }
                 Insert: {
@@ -42,6 +43,7 @@ export interface Database {
                     image_aim_path?: string | null
                     image_result_path?: string | null
                     description?: string | null
+                    throw_type?: string | null
                     user_id?: string // Handled by RLS usually, but useful for types
                 }
                 Update: {
@@ -59,6 +61,7 @@ export interface Database {
                     image_aim_path?: string | null
                     image_result_path?: string | null
                     description?: string | null
+                    throw_type?: string | null
                     user_id?: string
                 }
             }

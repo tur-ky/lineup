@@ -219,6 +219,10 @@ body {
   line-height: 1.25rem;
 }
 
+.text-accent-primary {
+  color: var(--accent-primary);
+}
+
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;

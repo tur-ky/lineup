@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Lineup } from '../../types/app';
-import { X, Copy, Check, ZoomIn, ZoomOut, Trash2 } from 'lucide-react';
+import { X, Copy, Check, ZoomIn, ZoomOut, Trash2, Pencil } from 'lucide-react';
 
 interface LineupDetailModalProps {
     lineup: Lineup;
     onClose: () => void;
     onDelete?: () => void;
+    onEdit?: (lineup: Lineup) => void;
 }
 
-export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, onClose, onDelete }) => {
+export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, onClose, onDelete, onEdit }) => {
     const [imageUrls, setImageUrls] = useState<{ pos: string; aim: string; result: string } | null>(null);
     const [copied, setCopied] = useState(false);
 
@@ -37,6 +38,23 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
 
         resolveImages();
     }, [lineup]);
+
+    // Handle ESC key: close lightbox if open (with zoom), then modal
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (expandedImage) {
+                    // If lightbox is open, close it first
+                    closeLightbox();
+                    e.stopPropagation(); // Prevent parent from closing modal
+                }
+                // If no lightbox, let parent handle closing the modal
+            }
+        };
+
+        window.addEventListener('keydown', handleEsc, true); // Use capture phase to intercept before parent
+        return () => window.removeEventListener('keydown', handleEsc, true);
+    }, [expandedImage]);
 
     const handleShare = () => {
         const shareUrl = `cslineups://view?id=${lineup.id}`; // Deep link format
@@ -91,9 +109,20 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
                         <div className="flex flex-col gap-1">
                             <h2 className="text-2xl font-bold text-white tracking-wide">{lineup.title}</h2>
                             <div className="flex gap-1 items-center text-secondary text-sm font-medium">
-                                <span className="uppercase">{lineup.side}</span>
-                                <span className="w-1 h-1 bg-white/20 rounded-full"></span>
-                                <span className="uppercase">{lineup.utility_type}</span>
+                                {lineup.throw_type?.trim() ? (
+                                    <span
+                                        className="uppercase font-bold"
+                                        style={{ color: '#06b6d4' }} // Cyan-500
+                                    >
+                                        {lineup.throw_type}
+                                    </span>
+                                ) : (
+                                    <>
+                                        <span className="uppercase">{lineup.side}</span>
+                                        <span className="w-1 h-1 bg-white/20 rounded-full"></span>
+                                        <span className="uppercase">{lineup.utility_type}</span>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -107,6 +136,19 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
                                 {copied ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
                                 <span className="font-medium text-sm">{copied ? 'Copied' : 'Share'}</span>
                             </button>
+                            <div className="w-px bg-white/10 h-6 mx-2"></div>
+
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(lineup)}
+                                    style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', padding: 0, color: 'white' }}
+                                    className="text-white hover:text-accent-primary transition-colors cursor-pointer outline-none"
+                                    title="Edit Lineup"
+                                >
+                                    <Pencil size={24} />
+                                </button>
+                            )}
+
                             <button
                                 onClick={handleDelete}
                                 style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', padding: 0, color: 'white' }}

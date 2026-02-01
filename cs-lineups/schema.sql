@@ -16,6 +16,7 @@ create table public.lineups (
   image_aim_path text null,
   image_result_path text null,
   description text null,
+  throw_type text null,
   user_id uuid null default auth.uid (),
   constraint lineups_pkey primary key (id)
 );
@@ -39,7 +40,8 @@ with check (auth.role() = 'authenticated');
 -- Optional: Allow users to update their own lineups
 create policy "Enable update for users based on user_id" 
 on public.lineups for update 
-using (auth.uid() = user_id);
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 
 -- 4. Storage Bucket Setup (Manual Step Reminder)
 -- Go to Storage -> Create new bucket named 'lineup-images'
