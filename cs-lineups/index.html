@@ -9,6 +9,14 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        document.body.innerHTML = '<div style="background:black;color:red;padding:20px;font-family:monospace"><h1>Startup Error</h1><p>' + message + '</p><pre>' + (error ? error.stack : '') + '</pre></div>';
+      };
+      window.onunhandledrejection = function(event) {
+        document.body.innerHTML = '<div style="background:black;color:red;padding:20px;font-family:monospace"><h1>Unhandled Promise Rejection</h1><p>' + event.reason + '</p></div>';
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
