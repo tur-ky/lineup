@@ -9,6 +9,10 @@
     "preview": "vite preview",
     "tauri": "tauri"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tur-ky/lineup.git"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.2",
     "@tauri-apps/api": "^2",
