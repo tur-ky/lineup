@@ -34,3 +34,8 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Updater Security
+src-tauri/updater-keys.key
+src-tauri/updater-keys.key.pub
+settings.json

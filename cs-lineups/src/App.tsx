@@ -17,6 +17,8 @@ import { supabase } from "./lib/supabase";
 import { Session, AuthChangeEvent, AuthError } from "@supabase/supabase-js";
 import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { LoginScreen } from "./components/Overlays/LoginScreen";
+import { UpdateModal } from "./components/Overlays/UpdateModal";
+import { useUpdateChecker } from "./hooks/useUpdateChecker";
 
 function App() {
   const [activeMap, setActiveMap] = useState("Mirage");
@@ -44,6 +46,9 @@ function App() {
   const [tempLanding, setTempLanding] = useState<{ x: number, y: number } | undefined>(undefined);
   const [tempOrigin, setTempOrigin] = useState<{ x: number, y: number } | undefined>(undefined);
   const mapCanvasRef = useRef<{ confirmSelection: () => void } | null>(null);
+
+  // Update Management
+  const { updateState, settings: updateSettings, downloadAndInstall, dismissUpdate } = useUpdateChecker();
 
   // Initialize Session
   useEffect(() => {
@@ -403,6 +408,44 @@ function App() {
               setSelectedLineup(null);
               setEditingLineup(lineup);
             }}
+          />
+        )}
+
+        {/* Update Modal */}
+        {updateState.status === "available" && (
+          <UpdateModal
+            updateInfo={updateState.info}
+            onInstall={downloadAndInstall}
+            onDismiss={dismissUpdate}
+            autoUpdateEnabled={updateSettings?.auto_update_enabled ?? false}
+          />
+        )}
+        {updateState.status === "downloading" && (
+          <UpdateModal
+            updateInfo={{ version: "Downloading...", date: "" }}
+            onInstall={() => {}}
+            onDismiss={() => {}}
+            downloadProgress={updateState.progress}
+            isDownloading={true}
+            autoUpdateEnabled={updateSettings?.auto_update_enabled ?? false}
+          />
+        )}
+        {updateState.status === "ready" && (
+          <UpdateModal
+            updateInfo={{ version: "Ready", date: "" }}
+            onInstall={() => process.exit(0)} // Exit to trigger update install
+            onDismiss={dismissUpdate}
+            isReady={true}
+            autoUpdateEnabled={updateSettings?.auto_update_enabled ?? false}
+          />
+        )}
+        {updateState.status === "error" && (
+          <UpdateModal
+            updateInfo={{ version: "Error", date: "" }}
+            onInstall={() => {}}
+            onDismiss={dismissUpdate}
+            error={updateState.message}
+            autoUpdateEnabled={updateSettings?.auto_update_enabled ?? false}
           />
         )}
       </div>
