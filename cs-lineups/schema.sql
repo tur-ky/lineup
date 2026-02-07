@@ -15,6 +15,7 @@ create table public.lineups (
   image_pos_path text null,
   image_aim_path text null,
   image_result_path text null,
+  video_context_path text null,
   description text null,
   throw_type text null,
   user_id uuid null default auth.uid (),

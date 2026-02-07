@@ -22,4 +22,5 @@ export interface NewLineupState {
         aim: File | null;
         result: File | null;
     };
+    video: File | null;
 }

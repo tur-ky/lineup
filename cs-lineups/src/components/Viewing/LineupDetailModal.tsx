@@ -11,7 +11,7 @@ interface LineupDetailModalProps {
 }
 
 export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, onClose, onDelete, onEdit }) => {
-    const [imageUrls, setImageUrls] = useState<{ pos: string; aim: string; result: string } | null>(null);
+    const [imageUrls, setImageUrls] = useState<{ pos: string; aim: string; result: string; video: string } | null>(null);
     const [copied, setCopied] = useState(false);
 
     // Lightbox State
@@ -27,13 +27,14 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
                 return data?.signedUrl || '';
             };
 
-            const [pos, aim, result] = await Promise.all([
+            const [pos, aim, result, video] = await Promise.all([
                 getUrl(lineup.image_pos_path),
                 getUrl(lineup.image_aim_path),
                 getUrl(lineup.image_result_path),
+                getUrl((lineup as any).video_context_path),
             ]);
 
-            setImageUrls({ pos, aim, result });
+            setImageUrls({ pos, aim, result, video });
         };
 
         resolveImages();
@@ -81,7 +82,12 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
         if (!window.confirm('Are you sure you want to delete this lineup? This cannot be undone.')) return;
 
         try {
-            const pathsToRemove = [lineup.image_pos_path, lineup.image_aim_path, lineup.image_result_path].filter(Boolean) as string[];
+            const pathsToRemove = [
+                lineup.image_pos_path, 
+                lineup.image_aim_path, 
+                lineup.image_result_path,
+                (lineup as any).video_context_path
+            ].filter(Boolean) as string[];
 
             if (pathsToRemove.length > 0) {
                 await supabase.storage.from('lineup-images').remove(pathsToRemove);
@@ -171,7 +177,7 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
 
                     {/* Content */}
                     <div className="flex grow overflow-hidden">
-                        {/* Images - Carousel style (Split 3 ways for MVP) */}
+                        {/* Images - 3-column grid with optional 4th video slot */}
                         <div className="grow grid grid-cols-2 grid-rows-2 gap-1 p-1 bg-black">
                             {/* Aim (Large) */}
                             <div
@@ -206,6 +212,23 @@ export const LineupDetailModal: React.FC<LineupDetailModalProps> = ({ lineup, on
                                 ) : <div className="w-full h-full bg-white/5 animate-pulse" />}
                             </div>
                         </div>
+
+                        {/* Video Context - Side panel if present */}
+                        {(lineup as any).video_context_path && (
+                            <div className="w-80 border-l border-white/10 bg-black p-1">
+                                <div className="relative h-full overflow-hidden rounded">
+                                    <span className="absolute top-2 left-2 bg-black/60 px-2 py-1 rounded text-base font-bold z-10">VIDEO CONTEXT</span>
+                                    {imageUrls?.video ? (
+                                        <video 
+                                            src={imageUrls.video} 
+                                            className="w-full h-full object-cover" 
+                                            controls 
+                                            loop
+                                        />
+                                    ) : <div className="w-full h-full bg-white/5 animate-pulse" />}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Footer / Description */}

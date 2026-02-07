@@ -36,16 +36,18 @@ export const UploadZone: React.FC<UploadZoneProps> = ({ label, file, onFileSelec
 
     return (
         <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{label}</span>
+            <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">{label}</span>
 
             {file ? (
                 <div className="relative w-full p-2 rounded-lg border border-glass-border bg-black/40 flex items-center justify-between group">
                     <span className="text-sm text-white truncate pr-6" title={file.name}>{file.name}</span>
                     <button
                         onClick={() => onFileSelect(null)}
-                        className="p-1 hover:bg-white/10 rounded-full text-secondary hover:text-white transition-colors"
+                        style={{ backgroundColor: 'transparent', border: 'none', outline: 'none' }}
+                        className="text-white hover:opacity-60 transition-opacity bg-transparent cursor-pointer p-0"
+                        title="Remove file"
                     >
-                        <X size={14} />
+                        <X size={16} color="white" />
                     </button>
                 </div>
             ) : (

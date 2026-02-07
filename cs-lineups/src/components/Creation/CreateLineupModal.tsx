@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UploadZone } from './UploadZone';
+import { VideoUploadZone } from './VideoUploadZone';
 import { supabase } from '../../lib/supabase';
 // import { Pin } from '../Map/Pin';
 import { NewLineupState, Lineup } from '../../types/app';
@@ -55,7 +56,8 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
         type: initialData?.utility_type || 'smoke',
         description: initialData?.description || '',
         throw_type: initialData?.throw_type || '',
-        images: { pos: null, aim: null, result: null }
+        images: { pos: null, aim: null, result: null },
+        video: null
     });
 
     // Helper function to generate throw_type string from current toggles
@@ -103,10 +105,11 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
                 return fullPath;
             };
 
-            const [posPath, aimPath, resultPath] = await Promise.all([
+            const [posPath, aimPath, resultPath, videoPath] = await Promise.all([
                 uploadImage(state.images.pos, 'pos', initialData?.image_pos_path),
                 uploadImage(state.images.aim, 'aim', initialData?.image_aim_path),
                 uploadImage(state.images.result, 'result', initialData?.image_result_path),
+                uploadImage(state.video, 'video', (initialData as any)?.video_context_path),
             ]);
 
             // Generate throw_type from current toggles at save time
@@ -124,6 +127,7 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
                 image_pos_path: posPath,
                 image_aim_path: aimPath,
                 image_result_path: resultPath,
+                video_context_path: videoPath,
                 description: state.description,
                 throw_type: throw_type
             };
@@ -154,15 +158,17 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1a1a1a]">
                     <h2 className="text-lg font-bold">{initialData ? 'Edit Lineup' : 'Create New Lineup'}</h2>
-                    <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full"><X size={20} /></button>
+                    <button onClick={onClose} style={{ backgroundColor: 'transparent', border: 'none', outline: 'none' }} className="text-white hover:opacity-60 transition-opacity bg-transparent cursor-pointer p-0" aria-label="Close">
+                        <X size={24} color="white" />
+                    </button>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 overflow-y-auto grow custom-scrollbar bg-[#121212]">
-                    <div className="space-y-4">
+                    <div className="flex flex-col gap-6">
                         {/* Title */}
                         <div>
-                            <label className="text-gray-400 text-xs uppercase font-bold mb-1 block">Title</label>
+                            <label className="text-gray-400 text-xs uppercase font-bold mb-2 block">Title</label>
                             <input
                                 type="text"
                                 value={state.title}
@@ -185,7 +191,7 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
                         {/* Type & Action (Replacing Side) */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-gray-400 text-xs uppercase font-bold mb-1 block">Utility</label>
+                                <label className="text-gray-400 text-xs uppercase font-bold mb-2 block">Utility</label>
                                 <select
                                     value={state.type}
                                     onChange={(e) => setState(prev => ({ ...prev, type: e.target.value as any }))}
@@ -199,7 +205,7 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
                                 </select>
                             </div>
                             <div>
-                                <label className="text-gray-400 text-xs uppercase font-bold mb-1 block">Action</label>
+                                <label className="text-gray-400 text-xs uppercase font-bold mb-2 block">Action</label>
                                 <div className="flex flex-wrap gap-2">
                                     {THROW_TYPES.filter(t => t.group === 'action').map(type => (
                                         <button
@@ -248,13 +254,18 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
                         </div>
 
                         {/* Screenshots */}
-                        <div className="space-y-2 pt-2">
-                            <label className="text-gray-400 text-xs uppercase font-bold block">Screenshots</label>
-                            <div className="grid grid-cols-1 gap-2">
+                        <div>
+                            <label className="text-gray-400 text-xs uppercase font-bold mb-3 block">Screenshots</label>
+                            <div className="grid grid-cols-1 gap-3">
                                 <UploadZone label="Position" file={state.images.pos} onFileSelect={(f) => setState(p => ({ ...p, images: { ...p.images, pos: f } }))} />
                                 <UploadZone label="Aim Point" file={state.images.aim} onFileSelect={(f) => setState(p => ({ ...p, images: { ...p.images, aim: f } }))} />
                                 <UploadZone label="Result" file={state.images.result} onFileSelect={(f) => setState(p => ({ ...p, images: { ...p.images, result: f } }))} />
                             </div>
+                        </div>
+
+                        {/* Video Context */}
+                        <div>
+                            <VideoUploadZone file={state.video} onFileSelect={(f) => setState(p => ({ ...p, video: f }))} />
                         </div>
 
                     </div>
