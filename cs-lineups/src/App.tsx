@@ -255,12 +255,12 @@ function App() {
   };
 
   return (
-    <div className="flex w-full h-full bg-[#0a0a0a] text-white overflow-hidden">
+    <div className="app-shell">
       {/* Sidebar */}
       <MapSwitcher activeMap={activeMap} onSelectMap={setActiveMap} />
 
       {/* Main Content */}
-      <div className="flex-1 relative h-full">
+      <div className="app-main">
         {/* Map Layer */}
         <MapCanvas
           ref={mapCanvasRef}
@@ -269,11 +269,17 @@ function App() {
           isSelecting={selectionStep !== null}
           selectionMode={selectionStep === 'throwing' ? 'throwing' : 'landing'}
           onCancelSelection={cancelSelection}
-          activeVectors={visibleVectors.map(l => ({
-            id: l.id,
-            landing: { x: l.landing_x, y: l.landing_y },
-            origin: { x: l.origin_x || 0, y: l.origin_y || 0 }
-          }))}
+          activeVectors={visibleVectors.flatMap((l) => {
+            if (l.origin_x == null || l.origin_y == null) {
+              return [];
+            }
+
+            return [{
+              id: l.id,
+              landing: { x: l.landing_x, y: l.landing_y },
+              origin: { x: l.origin_x, y: l.origin_y }
+            }];
+          })}
           onVectorClick={(id) => {
             const lineup = lineups.find(l => l.id === id);
             if (lineup) setSelectedLineup(lineup);
@@ -337,14 +343,14 @@ function App() {
           {!isCreating && selectionStep === null && (
             <div className="absolute top-4 right-4 pointer-events-auto flex gap-2">
               {session ? (
-                <div className="flex items-center gap-2 bg-black/40 backdrop-blur px-3 py-1.5 rounded-full border border-white/10">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span className="text-xs font-bold text-white/80">Logged In</span>
+                <div className="status-chip">
+                  <div className="status-chip__dot"></div>
+                  <span className="text-xs font-bold">Logged In</span>
                 </div>
               ) : (
                 <button
                   onClick={() => setShowLogin(true)}
-                  className="btn btn-primary text-xs py-1.5 px-3 shadow-lg"
+                  className="auth-login-btn"
                 >
                   Login
                 </button>
@@ -370,7 +376,7 @@ function App() {
 
           {/* Loading Indicator */}
           {loading && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-white/30 animate-pulse">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 loading-chip animate-pulse">
               Syncing...
             </div>
           )}
@@ -454,3 +460,5 @@ function App() {
 }
 
 export default App;
+
+

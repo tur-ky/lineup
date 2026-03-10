@@ -50,7 +50,7 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
 
     const [state, setState] = useState<NewLineupState>({
         landing: initialData ? { x: initialData.landing_x, y: initialData.landing_y } : (initialLanding || null),
-        origin: initialData ? { x: initialData.origin_x || 0, y: initialData.origin_y || 0 } : (initialOrigin || null),
+        origin: initialData ? (initialData.origin_x != null && initialData.origin_y != null ? { x: initialData.origin_x, y: initialData.origin_y } : null) : (initialOrigin || null),
         title: initialData?.title || '',
         side: initialData?.side || 't',
         type: initialData?.utility_type || 'smoke',
@@ -281,3 +281,4 @@ export const CreateLineupModal: React.FC<CreateLineupModalProps> = ({ onClose, a
         </div>
     );
 };
+
