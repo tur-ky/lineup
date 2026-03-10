@@ -15,7 +15,7 @@ export async function getSettings(): Promise<AppSettings> {
     console.error("Failed to get settings:", error);
     // Return defaults on error
     return {
-      auto_update_enabled: false,
+      auto_update_enabled: true,
     };
   }
 }
@@ -44,3 +44,4 @@ export async function updateSetting(
 export async function toggleAutoUpdate(enabled: boolean): Promise<void> {
   await updateSetting("auto_update_enabled", enabled);
 }
+

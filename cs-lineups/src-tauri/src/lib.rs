@@ -21,7 +21,7 @@ pub struct AppSettings {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            auto_update_enabled: false,
+            auto_update_enabled: true,
             last_update_check: None,
         }
     }
@@ -148,6 +148,11 @@ async fn download_and_install_update(app: tauri::AppHandle) -> Result<(), String
     }
 }
 
+#[tauri::command]
+fn restart_app(app: tauri::AppHandle) {
+    app.restart();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -176,9 +181,12 @@ pub fn run() {
             greet,
             check_for_updates,
             download_and_install_update,
+            restart_app,
             get_settings,
             update_setting
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+

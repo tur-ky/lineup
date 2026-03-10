@@ -48,7 +48,7 @@ function App() {
   const mapCanvasRef = useRef<{ confirmSelection: () => void } | null>(null);
 
   // Update Management
-  const { updateState, settings: updateSettings, downloadAndInstall, dismissUpdate } = useUpdateChecker();
+  const { updateState, settings: updateSettings, downloadAndInstall, restartToInstall, dismissUpdate } = useUpdateChecker();
 
   // Initialize Session
   useEffect(() => {
@@ -439,7 +439,7 @@ function App() {
         {updateState.status === "ready" && (
           <UpdateModal
             updateInfo={{ version: "Ready", date: "" }}
-            onInstall={() => process.exit(0)} // Exit to trigger update install
+            onInstall={restartToInstall}
             onDismiss={dismissUpdate}
             isReady={true}
             autoUpdateEnabled={updateSettings?.auto_update_enabled ?? false}
@@ -460,5 +460,6 @@ function App() {
 }
 
 export default App;
+
 
 

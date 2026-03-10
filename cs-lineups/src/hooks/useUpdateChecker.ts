@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getSettings, AppSettings } from "../lib/settings";
@@ -21,13 +21,12 @@ export type UpdateState =
 export function useUpdateChecker() {
   const [updateState, setUpdateState] = useState<UpdateState>({ status: "idle" });
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const restartTriggeredRef = useRef(false);
 
-  // Load settings on mount
   useEffect(() => {
     getSettings().then(setSettings);
   }, []);
 
-  // Check for updates on startup
   useEffect(() => {
     const checkForUpdates = async () => {
       setUpdateState({ status: "checking" });
@@ -45,17 +44,15 @@ export function useUpdateChecker() {
             },
           });
 
-          // If auto-update is enabled, start download immediately
           if (settings?.auto_update_enabled) {
-            downloadAndInstall();
+            void downloadAndInstall();
           }
         } else {
           setUpdateState({ status: "no-update" });
         }
       } catch (error: any) {
         console.error("Update check failed:", error);
-        
-        // Parse error message for better UX
+
         let errorMessage = "Failed to check for updates";
         if (typeof error === "string") {
           if (error.toLowerCase().includes("network") || error.toLowerCase().includes("connection")) {
@@ -66,18 +63,16 @@ export function useUpdateChecker() {
             errorMessage = error;
           }
         }
-        
+
         setUpdateState({ status: "error", message: errorMessage });
       }
     };
 
-    // Only check on mount, not every time settings change
     if (settings !== null) {
-      checkForUpdates();
+      void checkForUpdates();
     }
-  }, [settings?.auto_update_enabled]); // Only depends on auto_update_enabled
+  }, [settings?.auto_update_enabled]);
 
-  // Listen for download progress
   useEffect(() => {
     let unlistenProgress: (() => void) | undefined;
     let unlistenReady: (() => void) | undefined;
@@ -100,16 +95,36 @@ export function useUpdateChecker() {
     };
   }, []);
 
+  useEffect(() => {
+    if (updateState.status === "ready" && settings?.auto_update_enabled && !restartTriggeredRef.current) {
+      void restartToInstall();
+    }
+  }, [updateState.status, settings?.auto_update_enabled]);
+
   const downloadAndInstall = async () => {
     try {
       setUpdateState({ status: "downloading", progress: 0 });
       await invoke("download_and_install_update");
-      // State will be updated to "ready" via event listener
     } catch (error: any) {
       console.error("Download failed:", error);
       setUpdateState({
         status: "error",
         message: typeof error === "string" ? error : "Failed to download update",
+      });
+    }
+  };
+
+  const restartToInstall = async () => {
+    restartTriggeredRef.current = true;
+
+    try {
+      await invoke("restart_app");
+    } catch (error: any) {
+      restartTriggeredRef.current = false;
+      console.error("Restart failed:", error);
+      setUpdateState({
+        status: "error",
+        message: typeof error === "string" ? error : "Failed to restart app for update",
       });
     }
   };
@@ -120,10 +135,10 @@ export function useUpdateChecker() {
 
   const manualCheck = async () => {
     setUpdateState({ status: "checking" });
-    
+
     try {
       const update = await invoke<any>("check_for_updates");
-      
+
       if (update) {
         setUpdateState({
           status: "available",
@@ -148,6 +163,7 @@ export function useUpdateChecker() {
     updateState,
     settings,
     downloadAndInstall,
+    restartToInstall,
     dismissUpdate,
     manualCheck,
   };
